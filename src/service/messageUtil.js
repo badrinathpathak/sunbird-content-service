@@ -79,6 +79,12 @@ exports.CONTENT = {
     FAILED_CODE: 'ERR_CONTENT_SEARCH_FAILED',
     FAILED_MESSAGE: 'Search content failed'
   },
+  NLP_SEARCH: {
+    MISSING_CODE: 'ERR_CONTENT_NLP_SEARCH_STRING_MISSING',
+    MISSING_MESSAGE: 'Required fields for nlp search string are missing',
+    FAILED_CODE: 'ERR_CONTENT_SEARCH_FAILED',
+    FAILED_MESSAGE: 'Search string failed'
+  },
 
   CREATE: {
     MISSING_CODE: 'ERR_CONTENT_CREATE_FIELDS_MISSING',

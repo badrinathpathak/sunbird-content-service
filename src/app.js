@@ -38,6 +38,7 @@ const dialRepoBaseUrl = process.env.sunbird_dial_repo_api_base_url || 'https://q
 const pluginRepoBaseUrl = process.env.sunbird_plugin_repo_api_base_url || 'https://qa.ekstep.in/api'
 const dataServiceBaseUrl = process.env.sunbird_data_service_api_base_url || 'https://qa.ekstep.in/api'
 const languageServiceBaseUrl = process.env.sunbird_language_service_api_base_url || 'https://qa.ekstep.in/api/language'
+const nlpSearchBaseUrl = process.env.nlp_search_api_base_url || 'http://localhost:3456'
 
 const searchServiceApiKey = process.env.sunbird_search_service_api_key
 const dialRepoApiKey = process.env.sunbird_dial_repo_api_key
@@ -54,6 +55,7 @@ const contentServiceLocalBaseUrl = process.env.sunbird_content_service_local_bas
 const sunbirdGzipEnable = process.env.sunbird_gzip_enable || 'true'
 
 configUtil.setContentProviderApi(contentProviderApiConfig.API)
+configUtil.setConfig('NLP_SEARCH_BASE_URL', nlpSearchBaseUrl)
 configUtil.setConfig('CONTENT_REPO_BASE_URL', contentRepoBaseUrl)
 configUtil.setConfig('TELEMETRY_BASE_URL', telemetryBaseUrl)
 configUtil.setConfig('CONTENT_REPO_AUTHORIZATION_TOKEN', 'Bearer ' + contentRepoApiKey)
@@ -167,6 +169,7 @@ require('./routes/externalUrlMetaRoute')(app)
 require('./routes/pluginsRoutes')(app)
 require('./routes/collaborationRoutes')(app)
 require('./routes/lockRoutes')(app)
+require('./routes/nlpRoutes')(app)
 // this middleware route add after all the routes
 require('./middlewares/proxy.middleware')(app)
 
