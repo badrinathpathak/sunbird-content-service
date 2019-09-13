@@ -89,6 +89,7 @@ function search(defaultContentTypes, req, response, objectType) {
       }, req)
 
       contentProvider.compositeSearch(ekStepReqData, req.headers, function (err, res) {
+        console.log(" @@@@compositeSearch searc function res 1 @@@ : ", JSON.stringify(res))
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.errCode = res && res.params ? res.params.err : contentMessage.SEARCH.FAILED_CODE
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.SEARCH.FAILED_MESSAGE
@@ -107,35 +108,67 @@ function search(defaultContentTypes, req, response, objectType) {
           rspObj.result = res && res.result ? res.result : {}
           rspObj = utilsService.getErrorResponse(rspObj, res)
           return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
-        } else if (res.result && res.result.count === 0) {
-          console.log(" @@@@calling searc nlp function @@@ : ", JSON.stringify(res))
-          searchNLP(req, function (err, nlpSearchRes) {
-            if (err) {
-              console.log("error response ", err)
-              return response.status(400).send(err)
-            } else {
-              console.log("success response ", JSON.stringify(nlpSearchRes))
-              CBW(null, nlpSearchRes)
-            }
-          })
         } else {
-          if (req.query.framework && req.query.framework !== 'null') {
-            getFrameworkDetails(req, function (err, data) {
-              if (err || res.responseCode !== responseCode.SUCCESS) {
-                logger.error({ msg: `Framework API failed with framework - ${req.query.framework}`, err }, req)
-                rspObj.result = res.result
-                return response.status(200).send(respUtil.successResponse(rspObj))
+          if (res.result && res.result.count === 0) {
+            // console.log(" @@@@calling searc nlp function @@@ : ", JSON.stringify(res))
+            searchNLP(req, function (err, nlpSearchRes) {
+              console.log(" @@@@nlp searc function res 2 @@@ : ", JSON.stringify(nlpSearchRes))
+              if (err) {
+                console.log("error response 3 ", err)
+                return response.status(400).send(err)
               } else {
-                var language = req.query.lang ? req.query.lang : 'en'
-                if (lodash.get(res, 'result.facets') &&
-                  lodash.get(data, 'result.framework.categories')) {
-                  modifyFacetsData(res.result.facets, data.result.framework.categories, language)
+                console.log("success response 4 ", JSON.stringify(nlpSearchRes))
+                // CBW(null, nlpSearchRes)
+                res = nlpSearchRes
+                console.log(" @@@@ else  searc function res 5 @@@ : ", JSON.stringify(res))
+                if (req.query.framework && req.query.framework !== 'null') {
+                  console.log(" @@@@ calling framework get 6 @@@ : ")
+                  getFrameworkDetails(req, function (err, data) {
+                    if (err || res.responseCode !== responseCode.SUCCESS) {
+                      console.log(" @@@@ err  framework get 7 data @@@ : ")
+                      logger.error({ msg: `Framework API failed with framework - ${req.query.framework}`, err }, req)
+                      rspObj.result = res.result
+                      return response.status(200).send(respUtil.successResponse(rspObj))
+                    } else {
+                      console.log(" @@@@ success  searc function res 8 @@@ : ", JSON.stringify(data))
+                      var language = req.query.lang ? req.query.lang : 'en'
+                      if (lodash.get(res, 'result.facets') &&
+                        lodash.get(data, 'result.framework.categories')) {
+                        modifyFacetsData(res.result.facets, data.result.framework.categories, language)
+                      }
+                      orgHelper.includeOrgDetails(req, res, CBW)
+                    }
+                  })
+                } else {
+                  console.log(" @@@@ else  searc function res 9 @@@ : ", JSON.stringify(res))
+                  orgHelper.includeOrgDetails(req, res, CBW)
                 }
-                orgHelper.includeOrgDetails(req, res, CBW)
               }
             })
           } else {
-            orgHelper.includeOrgDetails(req, res, CBW)
+            console.log(" @@@@ else  searc function res 10 @@@ : ", JSON.stringify(res))
+            if (req.query.framework && req.query.framework !== 'null') {
+              console.log(" @@@@ calling framework get 11 @@@ : ")
+              getFrameworkDetails(req, function (err, data) {
+                if (err || res.responseCode !== responseCode.SUCCESS) {
+                  console.log(" @@@@ err  framework get 12 data @@@ : ")
+                  logger.error({ msg: `Framework API failed with framework - ${req.query.framework}`, err }, req)
+                  rspObj.result = res.result
+                  return response.status(200).send(respUtil.successResponse(rspObj))
+                } else {
+                  console.log(" @@@@ success  searc function res 13 @@@ : ", JSON.stringify(data))
+                  var language = req.query.lang ? req.query.lang : 'en'
+                  if (lodash.get(res, 'result.facets') &&
+                    lodash.get(data, 'result.framework.categories')) {
+                    modifyFacetsData(res.result.facets, data.result.framework.categories, language)
+                  }
+                  orgHelper.includeOrgDetails(req, res, CBW)
+                }
+              })
+            } else {
+              console.log(" @@@@ else  searc function res 14 @@@ : ", JSON.stringify(res))
+              orgHelper.includeOrgDetails(req, res, CBW)
+            }
           }
         }
       })
@@ -149,7 +182,7 @@ function search(defaultContentTypes, req, response, objectType) {
           contentCount: lodash.get(rspObj.result, 'count')
         }
       }, req)
-      console.log("final output ")
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@final output @@@@@@@@@@@@@@@@@@@@@", JSON.stringify(rspObj))
       return response.status(200).send(respUtil.successResponse(rspObj))
     }
   ])
