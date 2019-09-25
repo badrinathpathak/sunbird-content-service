@@ -60,9 +60,171 @@ function searchAPI(req, response) {
 }
 
 function searchContentAPI(req, response) {
-  return search(getContentTypeForContent(), req, response, ['Content'])
+  return contentSearch(getContentTypeForContent(), req, response, ['Content'])
 }
 
+function contentSearch(defaultContentTypes, req, response, objectType) {
+  var data = req.body
+  var rspObj = req.rspObj
+
+  logger.debug({
+    msg: 'New contentService.search() called', additionalInfo: { rspObj }
+  }, req)
+
+  if (!data.request || !data.request.filters) {
+    rspObj.errCode = contentMessage.SEARCH.MISSING_CODE
+    rspObj.errMsg = contentMessage.SEARCH.MISSING_MESSAGE
+    rspObj.responseCode = responseCode.CLIENT_ERROR
+
+    logger.error({
+      msg: 'Error due to required request || request.filters are missing',
+      err: {
+        errCode: rspObj.errCode,
+        errMsg: rspObj.errMsg,
+        responseCode: rspObj.responseCode
+      },
+      additionalInfo: { data }
+    }, req)
+
+    return response.status(400).send(respUtil.errorResponse(rspObj))
+  }
+
+  if (!data.request.filters) {
+    data.request.filters.contentType = defaultContentTypes
+  }
+
+  // if fields exists it has to be sent as array to lp
+  if (req.query.fields) {
+    data.request.fields = req.query.fields.split(',')
+  }
+  if (objectType) {
+    data.request.filters.objectType = objectType
+  }
+  //    if(!data.request.filters.mimeType) {
+  //        data.request.filters.mimeType = getMimeTypeForContent();
+  //    }
+
+  var ekStepReqData = {
+    request: data.request
+  }
+
+  async.waterfall([
+
+    function (CBW) {
+      logger.debug({
+        msg: 'New Request to content provider to search the content',
+        additionalInfo: {
+          body: ekStepReqData
+        }
+      }, req)
+
+      contentProvider.compositeSearch(ekStepReqData, req.headers, function (err, res) {
+        if (err || res.responseCode !== responseCode.SUCCESS) {
+          rspObj.errCode = res && res.params ? res.params.err : contentMessage.SEARCH.FAILED_CODE
+          rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.SEARCH.FAILED_MESSAGE
+          rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+          logger.error({
+            msg: 'Getting error from content provider composite search',
+            err: {
+              err,
+              errCode: rspObj.errCode,
+              errMsg: rspObj.errMsg,
+              responseCode: rspObj.responseCode
+            },
+            additionalInfo: { ekStepReqData }
+          }, req)
+          var httpStatus = res && res.statusCode >= 100 && res.statusCode < 600 ? res.statusCode : 500
+          rspObj.result = res && res.result ? res.result : {}
+          rspObj = utilsService.getErrorResponse(rspObj, res)
+          return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
+        } else {
+          searchNLP(req, function (err, nlpSearchRes) {
+            console.log(" @@@@nlp searc function res 2 @@@ : ")
+            if (err || (nlpSearchRes.responseCode === responseCode.SUCCESS && nlpSearchRes.result.length === 0)) {
+              console.log("error response 3 ", err)
+              if (req.query.framework && req.query.framework !== 'null') {
+                getFrameworkDetails(req, function (err, data) {
+                  if (err || res.responseCode !== responseCode.SUCCESS) {
+                    logger.error({ msg: `Framework API failed with framework - ${req.query.framework}`, err }, req)
+                    rspObj.result = res.result
+                    return response.status(200).send(respUtil.successResponse(rspObj))
+                  } else {
+                    var language = req.query.lang ? req.query.lang : 'en'
+                    if (lodash.get(res, 'result.facets') &&
+                      lodash.get(data, 'result.framework.categories')) {
+                      modifyFacetsData(res.result.facets, data.result.framework.categories, language)
+                    }
+                    orgHelper.includeOrgDetails(req, res, CBW)
+                  }
+                })
+              } else {
+                orgHelper.includeOrgDetails(req, res, CBW)
+              }
+            } else {
+              console.log("success response 4 ", JSON.stringify(nlpSearchRes))
+              finalContentResponseFunc(nlpSearchRes, function (err, response) {
+                if (err) {
+                  console.log("error response 31 ", err)
+                  return response.status(400).send(err)
+                } else {
+                  console.log("###############################", JSON.stringify(response))
+                  console.log("###############dummyCompositesearchJson 1 ################", JSON.stringify(res))
+                  var compAndNlpResponse = res
+
+                  if (compAndNlpResponse.result.count == 0) {
+                    console.log("inside ifffffffff ", JSON.stringify(compAndNlpResponse.result.facets))
+                    delete compAndNlpResponse.result.facets
+                    console.log("inside after delete ifffffffff ", JSON.stringify(compAndNlpResponse.result.facets))
+                    compAndNlpResponse.result.facets = response.facets
+                    compAndNlpResponse.result.content = []
+                  }
+                  compAndNlpResponse.result.content.push(...response.content)
+                  removeDuplicatesContent(compAndNlpResponse.result.content, 'identifier', function (err, response) {
+                    compAndNlpResponse.result.content = response
+                    compAndNlpResponse.result.count = compAndNlpResponse.result.content.length
+
+                    console.log("############### finallllll ################", JSON.stringify(compAndNlpResponse))
+                    res = compAndNlpResponse
+                    if (req.query.framework && req.query.framework !== 'null') {
+                      getFrameworkDetails(req, function (err, data) {
+                        if (err || res.responseCode !== responseCode.SUCCESS) {
+                          logger.error({ msg: `Framework API failed with framework - ${req.query.framework}`, err }, req)
+                          rspObj.result = res.result
+                          return response.status(200).send(respUtil.successResponse(rspObj))
+                        } else {
+                          var language = req.query.lang ? req.query.lang : 'en'
+                          if (lodash.get(res, 'result.facets') &&
+                            lodash.get(data, 'result.framework.categories')) {
+                            modifyFacetsData(res.result.facets, data.result.framework.categories, language)
+                          }
+                          orgHelper.includeOrgDetails(req, res, CBW)
+                        }
+                      })
+                    } else {
+                      orgHelper.includeOrgDetails(req, res, CBW)
+                    }
+                  })
+                }
+              })
+            }
+          })
+        }
+      })
+    },
+
+    function (res) {
+      rspObj.result = res.result
+      logger.debug({
+        msg: `New Content searched successfully with ${lodash.get(rspObj.result, 'count')}`,
+        additionalInfo: {
+          contentCount: lodash.get(rspObj.result, 'count')
+        }
+      }, req)
+
+      return response.status(200).send(respUtil.successResponse(rspObj))
+    }
+  ])
+}
 function search(defaultContentTypes, req, response, objectType) {
   var data = req.body
   var rspObj = req.rspObj
@@ -1934,6 +2096,207 @@ function validateContentLock(req, response) {
     }
   })
 }
+/**
+ * Merging composite search result and nlp search response start
+ * also will remove duplicates contents
+ */
+
+function finalContentResponseFunc(dummyJson, done) {
+  var contentResponse = {}
+  async.waterfall([
+    function (callback) {
+      console.log('one3');
+      var unionFacets = modifyFacetsContent(dummyJson)
+      console.log("unionFacets :", JSON.stringify(unionFacets))
+
+      callback(null, unionFacets);
+    },
+    function (filteredArr, callback) {
+      console.log('three  4  :', filteredArr);
+      removeDuplicatesContent(filteredArr, 'identifier', function (err, filteredArrNew) {
+        console.log("filteredArrNew :", JSON.stringify(filteredArrNew))
+        callback(null, filteredArrNew);
+      })
+
+    }, function (filteredArrContent, callback) {
+      console.log('one 5');
+      var unionFacets = modifyFacets(dummyJson)
+      console.log("unionFacets :", unionFacets)
+      callback(null, filteredArrContent, unionFacets);
+    },
+    function (filteredArrContent, unionFacets, callback) {
+      console.log('two   6 :', unionFacets);
+      var filteredArr = arrayWithSameFacetName(unionFacets)
+      console.log("filteredArr :", filteredArr)
+      callback(null, filteredArrContent, filteredArr);
+    },
+    function (filteredArrContent, filteredArr, callback) {
+      console.log('three   7 :', filteredArr);
+      filteredArr.forEach(function (filteredArrElement) {
+        filteredArrElement.values = (removeDuplicates(filteredArrElement.values, 'name'))
+      })
+      callback(null, filteredArrContent, filteredArr);
+    }
+  ],
+    function (err, resultsContent, resultsFacets) {
+
+      contentResponse.count = resultsContent.length
+      contentResponse.content = resultsContent
+      contentResponse.facets = resultsFacets
+      console.log("result finalContentResponseFunc @@@@@@@@@@@", JSON.stringify(contentResponse))
+      done(null, contentResponse);
+    });
+}
+
+
+function modifyFacets(dummyJson) {
+  var allFacets = []
+  lodash.forEach(dummyJson.result, (contentElements) => {
+    lodash.forEach(contentElements.result.facets, (facets) => {
+      allFacets.push(facets)
+    })
+  })
+  return allFacets
+}
+
+function modifyFacetsContent(dummyJson) {
+  var allFacets = []
+  lodash.forEach(dummyJson.result, (contentElements) => {
+    lodash.forEach(contentElements.result.content, (facets) => {
+      allFacets.push(facets)
+    })
+  })
+  console.log("modifyFacetsContent :", JSON.stringify(allFacets))
+  return allFacets
+}
+
+function arrayWithSameFacetName(unionFacets) {
+  console.log(" arrayWithSameFacetName :", unionFacets)
+  return unionFacets.reduce((acc, current) => {
+    const x = acc.find(item => item.name === current.name);
+    if (!x) {
+      return acc.concat([current]);
+    } else {
+      lodash.forEach(acc, (accElement) => {
+        if (accElement.name === current.name) {
+          accElement.values.push(current.values[0])
+        }
+      })
+      return acc;
+    }
+  }, []);
+}
+
+function removeDuplicates(array, key) {
+  let lookup = {};
+  let result = [];
+  array.forEach(element => {
+if (element != null || element != undefined) {
+ if (!lookup[element[key]]) {
+      lookup[element[key]] = true;
+      result.push(element);
+    } else {
+      result.forEach(function (resultElement) {
+        if (resultElement.name === element.name) {
+          resultElement.count++;
+        }
+      })
+    }}
+  });
+  return result;
+}
+
+function removeDuplicatesContent(array, key, done) {
+  let lookup = {};
+  let result = [];
+  array.forEach(element => {
+    if (!lookup[element[key]]) {
+      lookup[element[key]] = true;
+      result.push(element);
+    }
+  });
+  done(null, result);
+}
+
+/**
+ * Nlp search function
+ */
+function searchNLP(req, done) {
+  var data = req.body.request
+  var rspObj = req.rspObj
+  console.log('in search')
+  logger.info({
+    msg: 'contentService.nlp.searchAPI() called', additionalInfo: { rspObj }
+  }, req)
+  logger.info({ msg: ' data' }, data)
+
+  if (!data || !data.query) {
+    rspObj.errCode = contentMessage.NLP_SEARCH.MISSING_CODE
+    rspObj.errMsg = contentMessage.NLP_SEARCH.MISSING_MESSAGE
+    rspObj.responseCode = responseCode.CLIENT_ERROR
+
+    logger.error({
+      msg: 'Error due to required request || request.query are missing',
+      err: {
+        errCode: rspObj.errCode,
+        errMsg: rspObj.errMsg,
+        responseCode: rspObj.responseCode
+      },
+      additionalInfo: { data }
+    }, req)
+
+    done(respUtil.errorResponse(rspObj), null)
+  }
+
+  var ekStepReqData = {
+    searchString: data.query
+  }
+
+  async.waterfall([
+
+    function (CBW) {
+      logger.info({
+        msg: 'Request to content provider to search the content',
+        additionalInfo: {
+          query: ekStepReqData
+        }
+      }, req)
+      contentProvider.nlpContentSearch(ekStepReqData, req.headers, function (err, res) {
+        if (err || res.responseCode !== responseCode.SUCCESS) {
+          logger.error({ msg: `Fetching nlp-search data failed ${lodash.get(ekStepReqData.searchString, 'searchString')}`, err }, req)
+          rspObj.result = res && res.result ? res.result : {}
+          logger.error({
+            msg: 'Error from content nlp search in nlp service',
+            err,
+            additionalInfo: { ekStepReqData }
+          }, req)
+          rspObj = utilsService.getErrorResponse(rspObj, res, contentMessage.NLP_SEARCH)
+          done(respUtil.errorResponse(rspObj), null)
+        } else {
+          logger.info({ msg: `Fetching searchString data success ${lodash.get(req.query, 'searchString')}` }, req)
+          CBW(null, res)
+        }
+      })
+    },
+    function (res) {
+      rspObj.result = res.result
+      logger.info({
+        msg: `Content nlp searched successfully with ${lodash.get(rspObj.result, 'count')}`,
+        additionalInfo: {
+          contentCount: lodash.get(rspObj.result, 'count')
+        }
+      }, req)
+      logger.info({
+        msg: 'Content nlp searched successfully with '
+      }, res)
+      console.log('new api final response', JSON.stringify(respUtil.successResponse(res)))
+      done(null, respUtil.successResponse(res))
+    }
+  ])
+}
+/**
+ *
+ */
 
 module.exports.searchAPI = searchAPI
 module.exports.searchContentAPI = searchContentAPI

@@ -215,7 +215,10 @@ function getFrameworkDetails(req, CBW) {
 }
 
 function modifyFacetsData(searchData, frameworkData, language) {
-  lodash.forEach(searchData, (facets) => {
+console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Inside modify search data @@@@@@@@@@@@@@@@@@@@@", JSON.stringify(searchData))
+console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Inside framework data @@@@@@@@@@@@@@@@@@@@@", JSON.stringify(frameworkData))
+console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ language data @@@@@@@@@@@@@@@@@@@@@", language)
+lodash.forEach(searchData, (facets) => {
     lodash.forEach(frameworkData, (categories) => {
       if (categories.code === facets.name) {
         lodash.forEach(facets.values, (values) => {
