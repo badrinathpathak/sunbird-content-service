@@ -223,6 +223,7 @@ function contentSearchWithNLP(defaultContentTypes, req, response, objectType) {
     function (res) {
       console.log("############### final calling to UI ################", JSON.stringify(res))
       rspObj.result = res.result
+      rspObj.responseCode = res.responseCode
       logger.debug({
         msg: `New Content searched successfully with ${lodash.get(rspObj.result, 'count')}`,
         additionalInfo: {
