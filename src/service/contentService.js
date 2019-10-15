@@ -67,7 +67,7 @@ function searchAPI(req, response) {
 
 function searchContentAPI(req, response) {
   var rspObj = req.rspObj;
-  if (process.env.NLP_SEARCH_ENABLED) {
+  if (process.env.NLP_SEARCH_ENABLED || req.query.nlpSearch) {
     LOG.info(
       utilsService.getLoggerData(
         rspObj,
