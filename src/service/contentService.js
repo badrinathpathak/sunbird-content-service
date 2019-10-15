@@ -66,28 +66,29 @@ function searchAPI(req, response) {
 } */
 
 function searchContentAPI(req, response) {
+  var rspObj = req.rspObj;
   if (process.env.NLP_SEARCH_ENABLED) {
-    LOG.debug(
+    LOG.info(
       utilsService.getLoggerData(
         rspObj,
-        'DEBUG',
+        'INFO',
         filename,
         'searchContentAPI',
         'contentService.search() called',
         { NLP_SEARCH_ENABLED: 'Enabled' }
       )
     );
-    /* logger.debug({
+    /* logger.info({
       msg: 'contentService.search() called', additionalInfo: { 'NLP_SEARCH_ENABLED': 'Enabled' }
     }, req) */
     return contentSearchWithNLP(getContentTypeForContent(), req, response, [
       'Content'
     ]);
   } else {
-    LOG.debug(
+    LOG.info(
       utilsService.getLoggerData(
         rspObj,
-        'DEBUG',
+        'INFO',
         filename,
         'searchContentAPI',
         'contentService.search() called',
