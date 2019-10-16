@@ -74,7 +74,7 @@ function searchContentAPI(req, response) {
         'INFO',
         filename,
         'searchContentAPI',
-        'contentService.search() called',
+        'contentService.search() called --',
         { NLP_SEARCH_ENABLED: 'Enabled' }
       )
     );
