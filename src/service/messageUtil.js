@@ -1,12 +1,8 @@
 exports.COMPOSITE = {
-
-  CONTENT_TYPE: [
-    'Collection', 'LessonPlan', 'Resource', 'TextBook'
-  ]
-}
+  CONTENT_TYPE: ['Collection', 'LessonPlan', 'Resource', 'TextBook']
+};
 
 exports.COURSE = {
-
   SEARCH: {
     MISSING_CODE: 'ERR_COURSE_SEARCH_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for search course are missing',
@@ -69,17 +65,21 @@ exports.COURSE = {
   MIME_TYPE: 'application/vnd.ekstep.content-collection',
   CONTENT_TYPE: 'Course',
   PREFIX_CODE: 'org.sunbird.'
-}
+};
 
 exports.CONTENT = {
-
   SEARCH: {
     MISSING_CODE: 'ERR_CONTENT_SEARCH_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for search content are missing',
     FAILED_CODE: 'ERR_CONTENT_SEARCH_FAILED',
     FAILED_MESSAGE: 'Search content failed'
   },
-
+  NLP_SEARCH: {
+    MISSING_CODE: 'ERR_CONTENT_NLP_SEARCH_STRING_MISSING',
+    MISSING_MESSAGE: 'Required fields for nlp search string are missing',
+    FAILED_CODE: 'ERR_CONTENT_SEARCH_FAILED',
+    FAILED_MESSAGE: 'Search string failed'
+  },
   CREATE: {
     MISSING_CODE: 'ERR_CONTENT_CREATE_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for create content are missing',
@@ -181,12 +181,7 @@ exports.CONTENT = {
     FAILED_MESSAGE: 'Unlisted publish content failed'
   },
 
-  CONTENT_TYPE: [
-    'Story',
-    'Worksheet',
-    'TextBook',
-    'Collection'
-  ],
+  CONTENT_TYPE: ['Story', 'Worksheet', 'TextBook', 'Collection'],
 
   MIME_TYPE: [
     'application/vnd.ekstep.ecml-archive',
@@ -264,7 +259,8 @@ exports.CONTENT = {
     FAILED_MESSAGE: 'Creating lock failed',
     ALREADY_LOCKED: 'The resource is already locked by {{Name}}',
     DEVICE_ID_MISSING: 'X-device-Id is missing in headers',
-    SAME_USER_ERR_MSG: 'The resource is already locked by you in a different window/device',
+    SAME_USER_ERR_MSG:
+      'The resource is already locked by you in a different window/device',
     UNAUTHORIZED: 'You are not authorized to lock this resource',
     SELF_LOCKED_CODE: 'RESOURCE_SELF_LOCKED',
     LOCKED_CODE: 'RESOURCE_LOCKED'
@@ -296,10 +292,9 @@ exports.CONTENT = {
     FAILED_MESSAGE: 'Listing lock failed',
     DEVICE_ID_MISSING: 'X-device-Id is missing in headers'
   }
-}
+};
 
 exports.REQUEST = {
-
   PARAMS: {
     MISSING_CID_CODE: 'ERR_REQUEST_FIELDS_CID_MISSING',
     MISSING_CID_MESSAGE: 'Required field consumer id is missing',
@@ -312,7 +307,7 @@ exports.REQUEST = {
     INVALID_CODE: 'ERR_TOKEN_INVALID',
     INVALID_MESSAGE: 'Access denied'
   }
-}
+};
 
 exports.RESPONSE_CODE = {
   CLIENT_ERROR: 'CLIENT_ERROR',
@@ -321,15 +316,15 @@ exports.RESPONSE_CODE = {
   RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
   UNAUTHORIZED_ACCESS: 'UNAUTHORIZED_ACCESS',
   PARTIAL_SUCCESS: 'PARTIAL_SUCCESS'
-}
+};
 
 exports.API_VERSION = {
   V1: '1.0'
-}
+};
 
 exports.SERVICE = {
   NAME: 'ContentService'
-}
+};
 
 exports.UTILS = {
   UPLOAD: {
@@ -344,10 +339,9 @@ exports.UTILS = {
     FAILED_CODE: 'ERR_GET_RESOURCE_BUNDLE_FAILED',
     FAILED_MESSAGE: 'Get resource bundle failed'
   }
-}
+};
 
 exports.DOMAIN = {
-
   GET_DOMAINS: {
     FAILED_CODE: 'ERR_GET_DOMAINS_FAILED',
     FAILED_MESSAGE: 'Get domains failed'
@@ -408,90 +402,103 @@ exports.DOMAIN = {
     FAILED_CODE: 'ERR_RETIRE_OBJECT_TYPE_FAILED',
     FAILED_MESSAGE: 'Retire object type failed'
   }
-}
+};
 
 exports.EMAIL = {
   CREATE_FLAG: {
     FAILED_CODE: 'ERR_SEND_CREATE_FLAG_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for create flag',
-    SUBJECT: 'Flag raised for your content: Content Type: {{Content type}}, Title: {{Content title}} ',
-    BODY: 'Your content is flagged by another user. <br><br>' +
-            '<b>Content Type: </b>{{Content type}}<br>' +
-            '<b>Title: </b>{{Content title}}<br>' +
-            '<b>Flag(s) Raised: </b>{{Flag reason}}<br>' +
-            '<b>Content Status: </b>{{Content status}}<br>',
+    SUBJECT:
+      'Flag raised for your content: Content Type: {{Content type}}, Title: {{Content title}} ',
+    BODY:
+      'Your content is flagged by another user. <br><br>' +
+      '<b>Content Type: </b>{{Content type}}<br>' +
+      '<b>Title: </b>{{Content title}}<br>' +
+      '<b>Flag(s) Raised: </b>{{Flag reason}}<br>' +
+      '<b>Content Status: </b>{{Content status}}<br>',
     TEMPLATE: 'contentFlagged'
   },
   ACCEPT_FLAG: {
     FAILED_CODE: 'ERR_SEND_ACCEPT_FLAG_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for accept flag',
-    SUBJECT: 'Reviewer has accepted the flag for your content: {{Content type}} ',
-    BODY: 'Your content has been flagged by the reviewer. <br><br>' +
-            '<b>Content Type: </b>{{Content type}}<br>' +
-            '<b>Title: </b>{{Content title}}<br>' +
-            '<b>Flag(s) Raised: </b>{{Flag reason}}<br>',
+    SUBJECT:
+      'Reviewer has accepted the flag for your content: {{Content type}} ',
+    BODY:
+      'Your content has been flagged by the reviewer. <br><br>' +
+      '<b>Content Type: </b>{{Content type}}<br>' +
+      '<b>Title: </b>{{Content title}}<br>' +
+      '<b>Flag(s) Raised: </b>{{Flag reason}}<br>',
     TEMPLATE: 'acceptFlag'
   },
   REJECT_FLAG: {
     FAILED_CODE: 'ERR_SEND_REJECT_FLAG_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for reject flag',
-    SUBJECT: 'Congratulations, your content is live! Content Type: {{Content type}}, Title: {{Content title}}',
-    BODY: 'Congratulations! The content that you had submitted has been accepted for publication.' +
-            ' It is now available for usage. <br><br>' +
-            '<b>Content Type: </b>{{Content type}}<br>' +
-            '<b>Title: </b>{{Content title}}<br>' +
-            '<b>Status: </b>{{Content status}}<br>',
+    SUBJECT:
+      'Congratulations, your content is live! Content Type: {{Content type}}, Title: {{Content title}}',
+    BODY:
+      'Congratulations! The content that you had submitted has been accepted for publication.' +
+      ' It is now available for usage. <br><br>' +
+      '<b>Content Type: </b>{{Content type}}<br>' +
+      '<b>Title: </b>{{Content title}}<br>' +
+      '<b>Status: </b>{{Content status}}<br>',
     TEMPLATE: 'rejectFlag'
   },
   PUBLISHED_CONTENT: {
     FAILED_CODE: 'ERR_SEND_PUBLISHED_CONTENT_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for published content',
-    SUBJECT: 'Congratulations, your content is live! Content Type: {{Content type}}, Title: {{Content title}}',
-    BODY: 'Congratulations! The content that you had submitted has been accepted for publication. ' +
-            'It will be available for usage shortly. <br><br>' +
-            '<b>Content Type: </b>{{Content type}}<br>  ' +
-            '<b>Title: </b>{{Content title}}<br>',
+    SUBJECT:
+      'Congratulations, your content is live! Content Type: {{Content type}}, Title: {{Content title}}',
+    BODY:
+      'Congratulations! The content that you had submitted has been accepted for publication. ' +
+      'It will be available for usage shortly. <br><br>' +
+      '<b>Content Type: </b>{{Content type}}<br>  ' +
+      '<b>Title: </b>{{Content title}}<br>',
     TEMPLATE: 'publishContent'
   },
   REJECT_CONTENT: {
     FAILED_CODE: 'ERR_SEND_REJECT_CONTENT_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for reject content',
-    SUBJECT: 'Our sincere apologies! Content Type: {{Content type}}, Title: {{Content title}}',
-    BODY: 'We acknowledge your contribution and effort in creating content for us.' +
-            ' However, we are unable to accept the content that you submitted.<br>' +
-            'We look forward to a more meaningful relationship with you, the next time around. <br><br>' +
-            '<b>Content Type: </b>{{Content type}}<br>' +
-            '<b>Title: </b>{{Content title}}<br>' +
-            '<b>Status: </b>{{Content status}}<br>',
+    SUBJECT:
+      'Our sincere apologies! Content Type: {{Content type}}, Title: {{Content title}}',
+    BODY:
+      'We acknowledge your contribution and effort in creating content for us.' +
+      ' However, we are unable to accept the content that you submitted.<br>' +
+      'We look forward to a more meaningful relationship with you, the next time around. <br><br>' +
+      '<b>Content Type: </b>{{Content type}}<br>' +
+      '<b>Title: </b>{{Content title}}<br>' +
+      '<b>Status: </b>{{Content status}}<br>',
     TEMPLATE: 'rejectContent'
   },
   UNLISTED_PUBLISH_CONTENT: {
     FAILED_CODE: 'ERR_SEND_UNLISTED_PUBLISH_CONTENT_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for unlist publish content',
     SUBJECT: 'Congratulations, your content {{Content title}} is live!',
-    BODY: 'Congratulations! The content is now ready for limited sharing. ' +
-            'You can share it using <a href=\'{{Share url}}\'>{{Share url}}</a>. <br><br>' +
-            '<b>Content Type: </b>{{Content type}}<br>  ' +
-            '<b>Title: </b>{{Content title}}<br>',
+    BODY:
+      'Congratulations! The content is now ready for limited sharing. ' +
+      "You can share it using <a href='{{Share url}}'>{{Share url}}</a>. <br><br>" +
+      '<b>Content Type: </b>{{Content type}}<br>  ' +
+      '<b>Title: </b>{{Content title}}<br>',
     TEMPLATE: 'unlistedPublishContent'
   },
   ADD_COLLABORATORS: {
     FAILED_CODE: 'ERR_SEND_ADD_COLLABORATORS_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for adding collaborators',
     SUBJECT: 'Congratulations! You are now a Collaborator',
-    BODY: '{{User}} has added you as a collaborator for the ' +
-    '{{Content type}}: {{Content title}}. View this in {{Content link}}',
+    BODY:
+      '{{User}} has added you as a collaborator for the ' +
+      '{{Content type}}: {{Content title}}. View this in {{Content link}}',
     TEMPLATE: 'default'
   },
   REMOVE_COLLABORATORS: {
     FAILED_CODE: 'ERR_SEND_REMOVE_COLLABORATORS_EMAIL',
     FAILED_MESSAGE: 'Sending email failed for removing collaborators',
     SUBJECT: 'Removed as Collaborator',
-    BODY: '{{User}} has removed you as a collaborator for the ' +
-    '{{Content type}}: {{Content title}}',
+    BODY:
+      '{{User}} has removed you as a collaborator for the ' +
+      '{{Content type}}: {{Content title}}',
     TEMPLATE: 'default'
   }
-}
+};
 
 exports.HEALTH_CHECK = {
   EK_STEP: {
@@ -509,7 +516,7 @@ exports.HEALTH_CHECK = {
     FAILED_CODE: 'CASSANDRA_HEALTH_FAILED',
     FAILED_MESSAGE: 'Cassandra db is not connected'
   }
-}
+};
 
 exports.DIALCODE = {
   GENERATE: {
@@ -519,7 +526,6 @@ exports.DIALCODE = {
     FAILED_MESSAGE: 'Generate dialcode failed',
     MISSING_COUNT: 'ERR_DIALCODE_GENERATE_COUNT_ERROR',
     MISSING_COUNT_MESSAGE: 'Required fields count is missing or invalid'
-
   },
 
   LIST: {
@@ -605,7 +611,7 @@ exports.DIALCODE = {
     FAILED_CODE: 'ERR_RESERVING_DIALCODE_FAILED',
     FAILED_MESSAGE: 'Unable to reserve the dial code'
   }
-}
+};
 
 exports.DATASET = {
   SUBMIT: {
@@ -624,7 +630,7 @@ exports.DATASET = {
     FAILED_CODE: 'GET_CHANNEL_DATASET_REQUEST_FAILED',
     FAILED_MESSAGE: 'Get channel dataset request failed'
   }
-}
+};
 
 exports.FORM = {
   READ: {
@@ -645,7 +651,7 @@ exports.FORM = {
     FAILED_CODE: 'ERR_UPDATE_FORM_DATA_FAILED',
     FAILED_MESSAGE: 'Unable to update the form data'
   }
-}
+};
 exports.EXTERNAL_URL_META = {
   FETCH: {
     MISSING_CODE: 'ERR_FETCH_URLMETA_MISSING',
@@ -653,4 +659,4 @@ exports.EXTERNAL_URL_META = {
     FAILED_CODE: 'ERR_FETCH_URLMETA_FAILED',
     FAILED_MESSAGE: 'Unable to load the url metadata'
   }
-}
+};
